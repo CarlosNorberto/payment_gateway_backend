@@ -1,9 +1,9 @@
 {
   "development": {
-    "username": "root",
-    "password": "stephano",
-    "database": "payments",
-    "host": "127.0.0.1",
+    "username": "node",
+    "password": "3Y5uRrXUnOzoUi140SXmS4VZu7IAq",
+    "database": "payment_gateway",
+    "host": "190.181.15.118",
     "dialect": "postgres"
   },
   "test": {

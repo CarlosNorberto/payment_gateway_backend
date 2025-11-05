@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { json, urlencoded } = require('body-parser');
+const errorHandler = require('./server/errors/error_handler');
 const path = require('path');
 
 const app = express();
@@ -28,6 +29,9 @@ app.get('/', (req, res) => {
 app.get('/ping', (req, res) => {
     res.status(200).send('pong');
 });
+
+// MIDDLEWARES
+app.use(errorHandler);
 
 // STATIC FILES
 app.use('/uploads', express.static(path.join(__dirname, 'server/uploads')));

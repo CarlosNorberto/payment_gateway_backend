@@ -10,8 +10,8 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             unique: true
         },
-        user_id: {
-            type: DataTypes.INTEGER,
+        reference: {
+            type: DataTypes.STRING(64),
             allowNull: true
         },
         amount: {
@@ -23,9 +23,9 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue: 'BOB'
         },
-        method: {
-            type: DataTypes.STRING(32),
-            allowNull: false
+        description: {
+            type: DataTypes.TEXT,
+            allowNull: true
         },
         status: {
             type: DataTypes.STRING(16),
@@ -35,23 +35,19 @@ module.exports = (sequelize, DataTypes) => {
         transaction_id: {
             type: DataTypes.STRING(128),
             allowNull: true
-        },
-        order_id: {
-            type: DataTypes.STRING(64),
-            allowNull: false
-        },
-        callback_url: {
+        },        
+        return_url: {
             type: DataTypes.TEXT,
             allowNull: true
         },
-        return_url: {
+        callback_url: {
             type: DataTypes.TEXT,
             allowNull: true
         },
         expires_at: {
             type: DataTypes.DATE,
             allowNull: true
-        },        
+        }
     }, {
         tableName: 'payments',
         timestamps: true
