@@ -5,6 +5,7 @@ module.exports = (app) => {
 
     // REGISTER PAYMENT
     app.post(process.env.PREFIX_API + '/payments/register', payments.registerPayment);
+    app.get(process.env.PREFIX_API + '/payments/details/:payment_id', payments.getPaymentDetails);
     
     // PAYMENT METHODS
     app.get(process.env.PREFIX_API + '/payment_methods/all', payment_methods.getAll);

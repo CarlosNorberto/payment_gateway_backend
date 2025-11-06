@@ -6,8 +6,13 @@ const { v4: uuidv4 } = require('uuid');
 
 const registerPayment = async (req, res, next) => {
     try {
+        // VALIDATE DATA
         validatePaymentData(req);
+        // GET DATA
         const { amount, reference, currency, description, callback_url, return_url } = req.body;
+        // CALL BANK API HERE IF NEEDED
+        // ...
+        // CREATE PAYMENT
         const payment = await md.payments.create({
             payment_id: uuidv4(),
             reference,
@@ -19,7 +24,9 @@ const registerPayment = async (req, res, next) => {
             return_url,
             expires_at: dateFns.addMinutes(new Date(), 15)
         });
+        // GENERATE TOKEN
         const token = jwt.sign({ payment_id: payment.payment_id }, process.env.JWT_SECRET, { expiresIn: '15m' });
+        // LOG EVENT
         await md.payment_events.create({
             payment_id: payment.payment_id,
             event_type: 'created',
@@ -27,7 +34,7 @@ const registerPayment = async (req, res, next) => {
             new_status: 'created',            
             source: 'system'
         });
-        // return url
+        // RETURN URL
         res.status(201).json({
             url: `${process.env.URL_FRONTEND}/pay/${payment.payment_id}?token=${token}`
         });
@@ -69,6 +76,32 @@ const validatePaymentData = (req) => {
         return null;        
     } catch (error) {
         throw error;        
+    }
+};
+
+const getPaymentDetails = async (req, res, next) => {
+    try {
+        const { payment_id } = req.params;
+        const payment = await md.payments.findOne({ where: { payment_id } });
+        if (!payment) {
+            throw new CustomError('Pago no encontrado', 404, `No se encontró ningún pago con el ID proporcionado: ${payment_id}`);
+        }else if (payment.status !== 'created') {
+            if(payment.status === 'pending'){
+                throw new CustomError('El pago está pendiente', 409, 'El pago está pendiente. Por favor, espere a que se complete.');
+            }else if (payment.status === 'expired') {
+                throw new CustomError('El pago ha expirado', 410, 'El pago ha expirado y no puede ser procesado.');
+            }else if (payment.status === 'paid') {
+                throw new CustomError('El pago ya ha sido realizado', 409, 'El pago ya ha sido realizado y no puede ser procesado nuevamente.');
+            }else if (payment.status === 'cancelled') {
+                throw new CustomError('El pago ha sido cancelado', 409, 'El pago ha sido cancelado y no puede ser procesado.');
+            }else if(payment.status === 'failed'){
+                throw new CustomError('El pago ha fallado', 409, 'El pago ha fallado y no puede ser procesado.');
+            }
+        }
+        payment.update({status: 'pending'});
+        res.status(200).json({ payment });
+    } catch (error) {
+        next(error);
     }
 };
 
